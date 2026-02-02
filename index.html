@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人简介</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #fafbfc;
+            min-height: 100vh;
+            color: #1a1a2e;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body.has-background::before {
+            display: none;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-section {
+            text-align: center;
+            padding: 80px 0 60px;
+            position: relative;
+        }
+
+        .avatar-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 30px;
+        }
+
+        .avatar-wrapper::before {
+            content: '';
+            position: absolute;
+            inset: -8px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6, #3b82f6);
+            border-radius: 50%;
+            animation: rotate 8s linear infinite;
+            z-index: -1;
+        }
+
+        .avatar-wrapper::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            background: #fafbfc;
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .avatar {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid rgba(99, 102, 241, 0.1);
+            background: linear-gradient(135deg, #f0f0f5, #e8e8f0);
+        }
+
+        .username {
+            font-size: 3em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1a1a2e 0%, #6366f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            letter-spacing: -0.5px;
+        }
+
+        .bio {
+            font-size: 1.1em;
+            color: rgba(26, 26, 46, 0.6);
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        .bio span {
+            color: rgba(26, 26, 46, 0.3);
+            margin: 0 10px;
+        }
+
+        .section {
+            margin-top: 80px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .section-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            margin-right: 20px;
+            border: 1px solid rgba(99, 102, 241, 0.15);
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+        }
+
+        .note-card {
+            background: #ffffff;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            border-radius: 20px;
+            padding: 32px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .note-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.05));
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .note-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 20px 40px -12px rgba(99, 102, 241, 0.15);
+        }
+
+        .note-card:hover::before {
+            opacity: 1;
+        }
+
+        .note-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .note-number {
+            font-size: 0.85em;
+            color: rgba(99, 102, 241, 0.4);
+            font-weight: 600;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .note-title {
+            font-size: 1.4em;
+            color: #1a1a2e;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .note-content {
+            color: rgba(26, 26, 46, 0.6);
+            line-height: 1.8;
+            font-size: 0.95em;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .project-card {
+            background: transparent;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .project-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .project-name {
+            font-size: 1.8em;
+            color: #1a1a2e;
+            margin-bottom: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .project-description {
+            color: rgba(26, 26, 46, 0.6);
+            line-height: 1.6;
+            font-size: 1.1em;
+            font-weight: 400;
+        }
+
+        .project-image {
+            width: 280px;
+            min-width: 280px;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .project-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.15), transparent);
+            margin: 60px 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 20px;
+            }
+
+            .username {
+                font-size: 2.2em;
+            }
+
+            .avatar {
+                width: 140px;
+                height: 140px;
+            }
+
+            .section {
+                margin-top: 60px;
+            }
+
+            .section-title {
+                font-size: 1.5em;
+            }
+
+            .project-card {
+                flex-direction: column;
+            }
+
+            .project-image {
+                width: 100%;
+                min-width: unset;
+                height: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="profile-section">
+            <div class="avatar-wrapper">
+                <img src="" alt="头像" class="avatar" id="avatar">
+            </div>
+            <h1 class="username" id="username"></h1>
+            <p class="bio" id="bio"></p>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section">
+            <div class="section-header">
+                <!-- <div class="section-icon">📝</div> -->
+                <h2 class="section-title">Notebook</h2>
+            </div>
+            <div class="notes-grid" id="notes-grid"></div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <!-- <div class="section-icon">🚀</div> -->
+                <h2 class="section-title">Projects</h2>
+            </div>
+            <div class="projects-grid" id="projects-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        async function loadConfig() {
+            try {
+                const response = await fetch('config.json');
+                const config = await response.json();
+
+                if (config.background) {
+                    document.body.style.backgroundImage = `url(${config.background})`;
+                    document.body.style.backgroundSize = 'cover';
+                    document.body.style.backgroundPosition = 'center';
+                    document.body.style.backgroundRepeat = 'no-repeat';
+                    document.body.style.backgroundAttachment = 'fixed';
+                    document.body.classList.add('has-background');
+                } else {
+                    document.body.style.background = '#fafbfc';
+                    document.body.classList.remove('has-background');
+                }
+
+                document.getElementById('avatar').src = config.profile.avatar;
+                document.getElementById('username').textContent = config.profile.username;
+                document.getElementById('bio').innerHTML = config.profile.bio.replace(/·/g, ' <span>·</span> ');
+
+                const notesGrid = document.getElementById('notes-grid');
+                config.notes.forEach(note => {
+                    const noteCard = document.createElement('div');
+                    noteCard.className = 'note-card';
+                    noteCard.innerHTML = `
+                        <div class="note-number">${note.id}</div>
+                        <div class="note-title">${note.title}</div>
+                        <div class="note-content">${note.content}</div>
+                    `;
+                    if (note.link) {
+                        noteCard.style.cursor = 'pointer';
+                        noteCard.addEventListener('click', () => {
+                            window.open(note.link, '_blank');
+                        });
+                    }
+                    notesGrid.appendChild(noteCard);
+                });
+
+                const projectsGrid = document.getElementById('projects-grid');
+                config.projects.forEach(project => {
+                    const projectCard = document.createElement('div');
+                    projectCard.className = 'project-card';
+                    
+                    let projectImageHTML;
+                    if (project.image) {
+                        projectImageHTML = `<img src="${project.image}" alt="${project.name}">`;
+                    } else {
+                        projectImageHTML = '';
+                    }
+                    
+                    projectCard.innerHTML = `
+                        <div class="project-info">
+                            <div class="project-name">${project.name}</div>
+                            <div class="project-description">${project.description}</div>
+                        </div>
+                        <div class="project-image">${projectImageHTML}</div>
+                    `;
+
+                    const projectName = projectCard.querySelector('.project-name');
+                    projectName.addEventListener('click', () => {
+                        window.open(project.link, '_blank');
+                    });
+
+                    projectsGrid.appendChild(projectCard);
+                });
+            } catch (error) {
+                console.error('加载配置文件失败:', error);
+            }
+        }
+
+        loadConfig();
+    </script>
+</body>
+</html>

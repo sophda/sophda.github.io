@@ -1,0 +1,36 @@
+{
+  "background": "",
+  "profile": {
+    "avatar": "src/avatar.png",
+    "username": "sophda",
+    "bio": "日夜辛盼尽黑发，风雨兼程心堪累。行至九十阴云至，沉吟穷尽相思泪。"
+  },
+  "notes": [
+    {
+      "id": "01",
+      "title": "Engineer",
+      "content": "Computer Science, Embedding, Deep Learning, Computer Vision",
+      "link": "https://github.com/sophda/Notebook/tree/master/Engineer"
+    },
+    {
+      "id": "02",
+      "title": "Math",
+      "content": "Linear Algebra, Probability, Statistics, Calculous",
+      "link": "https://github.com/sophda/Notebook/tree/master/Math"
+    },
+    {
+      "id": "03",
+      "title": "Life",
+      "content": "Economics, Daily Life",
+      "link": "https://github.com/sophda/Notebook/tree/master/Life"
+    }
+  ],
+  "projects": [
+    {
+      "image": "src/ar.gif",
+      "name": "AR SLAM",
+      "description": "基于orbslam3和ace模型的AR系统，实现实时环境建模和定位功能",
+      "link": "https://github.com/sophda/orbslam3-ar"
+    }
+  ]
+}

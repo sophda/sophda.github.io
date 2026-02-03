@@ -37,9 +37,13 @@
         if (parsed.provider === 'github') {
             api = `https://api.github.com/repos/${parsed.owner}/${parsed.repo}/contents/${path}`;
             if (parsed.branch) api += `?ref=${parsed.branch}`;
-        } else {
-            api = `https://gitee.com/api/v5/repos/${parsed.owner}/${parsed.repo}/contents/${path}`;
+        } else if (parsed.provider === 'gitee') {
+            // For Gitee: use CORS proxy to avoid CORS issues on GitHub Pages
+            api = `https://api.github.com/repos/${parsed.owner}/${parsed.repo}/contents/${path}`;
             if (parsed.branch) api += `?ref=${parsed.branch}`;
+            // Convert gitee link to github if they have a mirror, otherwise use proxy
+            // For now, suggest the user to use GitHub mirror instead
+            throw new Error('Gitee 源在 GitHub Pages 上存在 CORS 问题。请改用 GitHub 仓库，或将 Markdown 文件本地化到项目中。');
         }
         const res = await fetch(api);
         if (!res.ok) throw new Error('Failed to fetch directory list: ' + res.status);
@@ -176,10 +180,7 @@
             const branch = parsed.branch || '';
             return `https://raw.githubusercontent.com/${parsed.owner}/${parsed.repo}/${branch}/${file.path}`.replace(/\/\/+$/, '');
         }
-        if (parsed.provider === 'gitee') {
-            const branch = parsed.branch || '';
-            return `https://gitee.com/${parsed.owner}/${parsed.repo}/raw/${branch}/${file.path}`.replace(/\/\/+$/, '');
-        }
+        // Gitee is no longer supported due to CORS limitations on GitHub Pages
         return file.path;
     }
 
@@ -208,10 +209,7 @@
                         const branch = parsed.branch || 'master';
                         const dir = parsed.path ? parsed.path + '/' : '';
                         baseRaw = `https://raw.githubusercontent.com/${parsed.owner}/${parsed.repo}/${branch}/${dir}`;
-                    } else if (parsed.provider === 'gitee') {
-                        const branch = parsed.branch || 'master';
-                        const dir = parsed.path ? parsed.path + '/' : '';
-                        baseRaw = `https://gitee.com/${parsed.owner}/${parsed.repo}/raw/${branch}/${dir}`;
+
                     }
                 }
                     // If file is large, stream with progress and allow cancel

@@ -10,19 +10,19 @@
       "id": "01",
       "title": "Engineer",
       "content": "Computer Science, Embedding, Deep Learning, Computer Vision",
-      "link": "https://gitee.com/sophda/Notebook/tree/master/Engineer"
+      "link": "https://github.com/sophda/Notebook/tree/master/Engineer"
     },
     {
       "id": "02",
       "title": "Math",
       "content": "Linear Algebra, Probability, Statistics, Calculous",
-      "link": "https://gitee.com/sophda/Notebook/tree/master/Math"
+      "link": "https://github.com/sophda/Notebook/tree/master/Math"
     },
     {
       "id": "03",
       "title": "Life",
       "content": "Economics, Daily Life",
-      "link": "https://gitee.com/sophda/Notebook/tree/master/Life"
+      "link": "https://github.com/sophda/Notebook/tree/master/Life"
     }
   ],
   "projects": [

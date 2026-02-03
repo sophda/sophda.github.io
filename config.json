@@ -31,6 +31,12 @@
       "name": "AR SLAM",
       "description": "基于orbslam3和ace模型的AR系统，实现实时环境建模和定位功能",
       "link": "https://github.com/sophda/orbslam3-ar"
+    },
+    {
+      "image": "src/chatllm.gif",
+      "name": "Chat LLM",
+      "description": "使用纳西妲语料进行微调qwen2.5大模型，使用MNN框架进行安卓部署。",
+      "link": "https://github.com/sophda/ChatLLM"
     }
   ]
 }

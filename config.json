@@ -35,8 +35,14 @@
     {
       "image": "src/chatllm.gif",
       "name": "Chat LLM",
-      "description": "使用纳西妲语料进行微调qwen2.5大模型，使用MNN框架进行安卓部署。",
+      "description": "使用纳西妲语料进行微调qwen2.5大模型，使用MNN框架进行安卓部署",
       "link": "https://github.com/sophda/ChatLLM"
+    },
+    {
+      "image": "src/3dqt.png",
+      "name": "PointCloud Process",
+      "description": "本科毕设的一部分，用QT做的0代码点云处理软件",
+      "link": "https://github.com/sophda/PointCloudProcessQT"
     }
   ]
 }

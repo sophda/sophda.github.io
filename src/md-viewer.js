@@ -224,6 +224,13 @@
             list.appendChild(li);
         });
         openPanel();
+
+        if (files && files.length > 0) {
+            const firstLink = list.querySelector('a');
+            if (firstLink) {
+                firstLink.click(); // 模拟点击第一个链接
+            }
+        }
     }
 
     window.openMdFolder = async function(link, title) {

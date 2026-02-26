@@ -457,7 +457,8 @@
 
                     const projectName = projectCard.querySelector('.project-name');
                     projectName.addEventListener('click', () => {
-                        window.open(project.link, '_blank');
+                        if (window.openMdFolder) window.openMdFolder(project.link, project.name);
+                        else window.open(project.link, '_blank');
                     });
 
                     projectsGrid.appendChild(projectCard);

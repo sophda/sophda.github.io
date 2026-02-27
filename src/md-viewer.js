@@ -249,7 +249,7 @@
             renderList(files, parsed);
         } catch (e) {
             console.error(e);
-            alert('获取目录失败，可能触发了 GitHub API 频次限制。将为您打开仓库主页。');
+            alert('获取目录失败，可能触发了 GitHub API 频次限制。');
             // window.open(link, '_blank');
         }
     };

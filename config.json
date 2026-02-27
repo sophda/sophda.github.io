@@ -30,28 +30,29 @@
       "image": "img/nas.png",
       "name": "DIY NAS",
       "description": "古法炮制一个NAS主机",
-      "link": "https://github.com/sophda/DiyNAS"
+      "link": "https://github.com/sophda/DiyNAS",
+      "tags": ["2026.2"]
     },
     {
       "image": "img/ar.gif",
       "name": "AR SLAM",
       "description": "基于orbslam3和ace模型的AR系统，实现实时环境建模和定位功能",
       "link": "https://github.com/sophda/orbslam3-ar",
-      "tags": ["2025.6"]
+      "tags": ["2025.6","DONE"]
     },
     {
       "image": "img/chatllm.gif",
       "name": "CHAT LLM",
       "description": "使用纳西妲语料进行微调qwen2.5大模型，使用MNN框架进行安卓部署",
       "link": "https://github.com/sophda/ChatLLM",
-      "tags": ["2025.11"]
+      "tags": ["2025.11","DONE"]
     },
     {
       "image": "img/3dqt.png",
       "name": "PointCloud Process",
       "description": "本科毕设的一部分，用QT做的0代码点云处理软件",
       "link": "https://github.com/sophda/PointCloudProcessQT",
-      "tags": ["2023.3"]
+      "tags": ["2023.3","DONE"]
     }
   ]
 }

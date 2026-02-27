@@ -283,13 +283,8 @@
             // 取出原本的文件列表 ul
             const originalUl = columnsWrapper.querySelector('#md-file-list-col ul');
             if (originalUl) {
-                // 确保它插回最前面，以免影响 renderList 抓取
-                const firstUl = mdList.querySelector('ul');
-                if (firstUl) {
-                    mdList.insertBefore(originalUl, firstUl);
-                } else {
-                    mdList.appendChild(originalUl);
-                }
+                // 确保它插回到 mdList 中，插在 columnsWrapper 之前
+                mdList.insertBefore(originalUl, columnsWrapper);
             }
             columnsWrapper.remove(); // 销毁双列容器
         }

@@ -60,6 +60,7 @@
         if (!panel) return;
         panel.classList.add('open');
         panel.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
     }
 
     function closePanel() {
@@ -67,6 +68,11 @@
         if (!panel) return;
         panel.classList.remove('open');
         panel.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        
+        // Restore file list visibility
+        const mdList = document.querySelector('.md-list');
+        if (mdList) mdList.style.display = '';
     }
 
     async function loadAndRenderFile(url, parsed, baseRaw, fileSize) {
@@ -137,11 +143,15 @@
                 const txt = chunks;
                 const html = window.marked ? window.marked.parse(txt) : txt;
                 const safe = window.DOMPurify ? window.DOMPurify.sanitize(html) : html;
-                contentEl.innerHTML = safe;
+                const wrapper = document.createElement('div');
+                wrapper.className = 'md-content-wrapper';
+                wrapper.innerHTML = safe;
+                contentEl.innerHTML = '';
+                contentEl.appendChild(wrapper);
 
                 // Fix relative image URLs inside rendered markdown
                 if (baseRaw) {
-                    const imgs = contentEl.querySelectorAll('img');
+                    const imgs = wrapper.querySelectorAll('img');
                     imgs.forEach(img => {
                         const src = img.getAttribute('src') || '';
                         if (!src.match(/^https?:|^data:/i)) {
@@ -157,7 +167,11 @@
                 const txt = await res.text();
                 const html = window.marked ? window.marked.parse(txt) : txt;
                 const safe = window.DOMPurify ? window.DOMPurify.sanitize(html) : html;
-                contentEl.innerHTML = safe;
+                const wrapper = document.createElement('div');
+                wrapper.className = 'md-content-wrapper';
+                wrapper.innerHTML = safe;
+                contentEl.innerHTML = '';
+                contentEl.appendChild(wrapper);
             }
         } catch (e) {
             if (e.name === 'AbortError') {
@@ -233,7 +247,103 @@
         }
     }
 
+    function isLocalPath(link) {
+        return link && !link.startsWith('http://') && !link.startsWith('https://');
+    }
+
+    async function loadLocalMdFile(filePath, title) {
+        const contentEl = document.querySelector('.md-content');
+        const panel = document.getElementById('md-panel');
+        const panelTitle = document.getElementById('md-panel-title');
+        
+        contentEl.innerHTML = `
+            <div class="md-progress">
+                <div class="progress-label">加载中...</div>
+                <div class="progress"><div class="progress-bar" style="width:0%"></div></div>
+                <div style="margin-top:8px;"><button class="md-cancel-btn">取消</button></div>
+            </div>
+        `;
+        const progressBar = contentEl.querySelector('.progress-bar');
+        const cancelBtn = contentEl.querySelector('.md-cancel-btn');
+        const controller = new AbortController();
+        let aborted = false;
+        
+        cancelBtn.addEventListener('click', () => {
+            aborted = true;
+            controller.abort();
+            contentEl.innerHTML = '<p>已取消。</p>';
+        });
+
+        try {
+            const res = await fetch(filePath, { signal: controller.signal });
+            if (!res.ok) {
+                throw new Error(`Failed to fetch file: ${res.status}`);
+            }
+
+            const txt = await res.text();
+            const html = window.marked ? window.marked.parse(txt) : txt;
+            const safe = window.DOMPurify ? window.DOMPurify.sanitize(html) : html;
+            const wrapper = document.createElement('div');
+            wrapper.className = 'md-content-wrapper';
+            wrapper.innerHTML = safe;
+            contentEl.innerHTML = '';
+            contentEl.appendChild(wrapper);
+
+            // Fix relative image URLs for local files
+            const baseUrl = filePath.substring(0, filePath.lastIndexOf('/') + 1);
+            const imgs = wrapper.querySelectorAll('img');
+            imgs.forEach(img => {
+                const src = img.getAttribute('src') || '';
+                if (!src.match(/^https?:|^data:|^\//i)) {
+                    try {
+                        const resolved = new URL(src, window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1) + baseUrl).toString();
+                        img.src = resolved;
+                    } catch (e) {}
+                }
+            });
+
+            // Update panel title
+            if (panelTitle) panelTitle.textContent = title || 'Markdown';
+            // Hide the file list for single file view
+            const mdList = document.querySelector('.md-list');
+            if (mdList) mdList.style.display = 'none';
+            
+            openPanel();
+        } catch (e) {
+            if (e.name === 'AbortError') {
+                return;
+            }
+            console.error(e);
+            contentEl.innerHTML = `<p>加载失败：${e.message}</p><div style="margin-top:8px;"><button class="md-retry-btn">重试</button></div>`;
+            const retryBtn = contentEl.querySelector('.md-retry-btn');
+            if (retryBtn) retryBtn.addEventListener('click', () => {
+                loadLocalMdFile(filePath, title);
+            });
+        }
+    }
+
     window.openMdFolder = async function(link, title) {
+        // Handle local file paths
+        if (isLocalPath(link)) {
+            // If it's a .md file, load it directly
+            if (link.endsWith('.md')) {
+                await loadLocalMdFile(link, title);
+            } else {
+                // If it's a directory, try to list md files from it
+                try {
+                    const res = await fetch(link);
+                    if (!res.ok) throw new Error('Failed to fetch directory');
+                    // For local directories, we can't list files directly
+                    // Show a message or try to load an index.md if it exists
+                    alert('本地目录不支持列表视图，请改用本地 .md 文件路径');
+                } catch (e) {
+                    console.error(e);
+                    alert('无法加载本地文件或目录');
+                }
+            }
+            return;
+        }
+        
         const parsed = parseRepoLink(link);
         if (!parsed) {
             // fallback: open in new tab

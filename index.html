@@ -216,11 +216,27 @@
         }
 
         .project-card {
-            background: transparent;
+            background: #ffffff;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            border-radius: 16px;
             display: flex;
             flex-direction: row;
-            align-items: center;
-            padding: 20px;
+            align-items: flex-start;
+            padding: 32px;
+            gap: 32px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            cursor: pointer;
+        }
+
+        .project-card:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 12px 24px rgba(99, 102, 241, 0.1);
+            transform: translateY(-4px);
+        }
+
+        .project-card + .project-card {
+            margin-top: 24px;
         }
 
         .project-info {
@@ -230,18 +246,48 @@
         }
 
         .project-name {
-            font-size: 1.8em;
+            font-size: 1.6em;
             color: #1a1a2e;
             margin-bottom: 12px;
             font-weight: 600;
             cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .project-name:hover {
+            color: #6366f1;
         }
 
         .project-description {
             color: rgba(26, 26, 46, 0.6);
             line-height: 1.6;
-            font-size: 1.1em;
+            font-size: 1em;
             font-weight: 400;
+            margin-bottom: 16px;
+        }
+
+        .project-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .project-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+            color: #ffffff;
+            white-space: nowrap;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .project-tag:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
 
         .project-image {
@@ -251,6 +297,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.05));
+            overflow: hidden;
         }
 
         .project-image img {
@@ -355,12 +404,22 @@
 
             .project-card {
                 flex-direction: column;
+                gap: 20px;
             }
 
             .project-image {
                 width: 100%;
                 min-width: unset;
                 height: 180px;
+            }
+
+            .project-tags {
+                gap: 6px;
+            }
+
+            .project-tag {
+                padding: 5px 10px;
+                font-size: 0.8em;
             }
         }
     </style>
@@ -395,6 +454,25 @@
     </div>
 
     <script>
+        const tagColors = [
+            { bg: '#FF6B6B', border: '#FF5252' },
+            { bg: '#4ECDC4', border: '#45B7AA' },
+            { bg: '#45B7D1', border: '#3A9DBF' },
+            { bg: '#96CEB4', border: '#7BB89E' },
+            { bg: '#FFEAA7', border: '#FFDD5E' },
+            { bg: '#DDA0DD', border: '#BB7FCF' },
+            { bg: '#87CEEB', border: '#6BB6D9' },
+            { bg: '#F8B88B', border: '#F39C6B' },
+            { bg: '#95E1D3', border: '#7DD3C0' },
+            { bg: '#F38181', border: '#E56B6F' },
+            { bg: '#AA96DA', border: '#968FD6' },
+            { bg: '#FCBAD3', border: '#F99FBF' }
+        ];
+
+        function getTagColor(index) {
+            return tagColors[index % tagColors.length];
+        }
+
         async function loadConfig() {
             try {
                 const response = await fetch('config.json');
@@ -447,16 +525,26 @@
                         projectImageHTML = '';
                     }
                     
+                    let tagsHTML = '';
+                    if (project.tags && Array.isArray(project.tags)) {
+                        tagsHTML = '<div class="project-tags">';
+                        project.tags.forEach((tag, index) => {
+                            const color = getTagColor(index);
+                            tagsHTML += `<span class="project-tag" style="background: ${color.bg};">${tag}</span>`;
+                        });
+                        tagsHTML += '</div>';
+                    }
+                    
                     projectCard.innerHTML = `
                         <div class="project-info">
                             <div class="project-name">${project.name}</div>
                             <div class="project-description">${project.description}</div>
+                            ${tagsHTML}
                         </div>
                         <div class="project-image">${projectImageHTML}</div>
                     `;
 
-                    const projectName = projectCard.querySelector('.project-name');
-                    projectName.addEventListener('click', () => {
+                    projectCard.addEventListener('click', () => {
                         if (window.openMdFolder) window.openMdFolder(project.link, project.name);
                         else window.open(project.link, '_blank');
                     });

@@ -30,19 +30,22 @@
       "image": "src/ar.gif",
       "name": "AR SLAM",
       "description": "基于orbslam3和ace模型的AR系统，实现实时环境建模和定位功能",
-      "link": "https://github.com/sophda/orbslam3-ar"
+      "link": "https://github.com/sophda/orbslam3-ar",
+      "tags": ["2025.6"]
     },
     {
       "image": "src/chatllm.gif",
       "name": "Chat LLM",
       "description": "使用纳西妲语料进行微调qwen2.5大模型，使用MNN框架进行安卓部署",
-      "link": "https://github.com/sophda/ChatLLM"
+      "link": "https://github.com/sophda/ChatLLM",
+      "tags": ["2025.11"]
     },
     {
       "image": "src/3dqt.png",
       "name": "PointCloud Process",
       "description": "本科毕设的一部分，用QT做的0代码点云处理软件",
-      "link": "https://github.com/sophda/PointCloudProcessQT"
+      "link": "https://github.com/sophda/PointCloudProcessQT",
+      "tags": ["2023.3"]
     }
   ]
 }

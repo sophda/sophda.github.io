@@ -249,9 +249,8 @@
             renderList(files, parsed);
         } catch (e) {
             console.error(e);
-            // 【修改这里】：删除原来的 alert，改为直接新窗口打开原链接
-            console.warn('获取目录失败(可能触发了GitHub API频次限制)，已降级为直接打开原链接');
-            window.open(link, '_blank');
+            alert('获取目录失败，可能触发了 GitHub API 频次限制。将为您打开仓库主页。');
+            // window.open(link, '_blank');
         }
     };
 

@@ -149,6 +149,8 @@
                 contentEl.innerHTML = '';
                 contentEl.appendChild(wrapper);
 
+                generateRenderTOC(wrapper);
+
                 // Fix relative image URLs inside rendered markdown
                 if (baseRaw) {
                     const imgs = wrapper.querySelectorAll('img');
@@ -251,6 +253,167 @@
         return link && !link.startsWith('http://') && !link.startsWith('https://');
     }
 
+    
+
+    function generateTOC(wrapper) {
+        const mdList = document.querySelector('.md-list');
+        const ul = mdList.querySelector('ul');
+        const panelTitle = document.getElementById('md-panel-title');
+        
+        // 更改侧边栏标题
+        if (panelTitle) panelTitle.textContent = '目录大纲';
+        ul.innerHTML = ''; // 清空现有的列表
+        
+        // 获取所有标题元素
+        const headings = wrapper.querySelectorAll('h1, h2, h3, h4, h5, h6');
+        if (headings.length === 0) {
+            ul.innerHTML = '<li style="padding: 8px 10px; color: #888; font-size: 0.9em;">本文暂无目录</li>';
+        } else {
+            headings.forEach((h, index) => {
+                // 给标题动态添加唯一 ID
+                if (!h.id) h.id = 'md-heading-' + index;
+                
+                const li = document.createElement('li');
+                const level = parseInt(h.tagName.substring(1));
+                // 根据标题级别计算左侧缩进 (H1 不缩进，H2 缩进 12px，以此类推)
+                li.style.paddingLeft = ((level - 1) * 12) + 'px';
+                
+                const a = document.createElement('a');
+                a.href = '#' + h.id;
+                a.textContent = h.textContent;
+                a.title = h.textContent; // 鼠标悬停显示完整标题
+                
+                // 点击目录时平滑滚动到对应标题
+                a.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    h.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+                
+                li.appendChild(a);
+                ul.appendChild(li);
+            });
+        }
+        
+        // 确保左侧面板是显示状态
+        if (mdList) mdList.style.display = 'block';
+    }
+
+
+
+
+function generateRenderTOC(wrapper) {
+    const mdList = document.querySelector('.md-list');
+    if (!mdList) return;
+
+    // --- 1. 设置侧边栏宽度和布局模式 ---
+    // 改为 flex 垂直布局，确保大标题在顶部，内容在下方撑满
+    mdList.style.width = '480px'; 
+    mdList.style.maxWidth = '50%';
+    mdList.style.display = 'flex';
+    mdList.style.flexDirection = 'column';
+
+    // 统一顶部的大标题
+    const panelTitle = document.getElementById('md-panel-title');
+    if (panelTitle && panelTitle.textContent !== '文档概览') {
+        panelTitle.textContent = '文档概览';
+        panelTitle.style.marginBottom = '15px';
+    }
+
+    // --- 2. 查找或创建并排的双列容器 ---
+    let columnsWrapper = document.getElementById('md-toc-columns-wrapper');
+    if (!columnsWrapper) {
+        columnsWrapper = document.createElement('div');
+        columnsWrapper.id = 'md-toc-columns-wrapper';
+        // 关键所在：水平 Flex 布局，并让其占据下方所有可用高度
+        columnsWrapper.style.display = 'flex';
+        columnsWrapper.style.flexDirection = 'row';
+        columnsWrapper.style.gap = '15px';
+        columnsWrapper.style.alignItems = 'flex-start';
+        columnsWrapper.style.flex = '1'; 
+        columnsWrapper.style.overflow = 'hidden'; 
+
+        // 左列：用来放“文件列表”
+        const fileListCol = document.createElement('div');
+        fileListCol.id = 'md-file-list-col';
+        fileListCol.style.flex = '1';
+        fileListCol.style.overflowY = 'auto'; // 内容超长时允许左边独立滚动
+        fileListCol.style.height = '100%';
+        
+        // 【核心修复】找到你原本存放文件的那个 <ul>，并把它装进左列里面
+        const originalUl = mdList.querySelector('ul:not(.toc-list)');
+        if (originalUl) {
+            fileListCol.appendChild(originalUl);
+        }
+
+        // 右列：用来放“目录大纲”
+        const tocCol = document.createElement('div');
+        tocCol.id = 'md-toc-container';
+        tocCol.style.flex = '1';
+        tocCol.style.overflowY = 'auto'; // 内容超长时允许右边独立滚动
+        tocCol.style.height = '100%';
+        tocCol.style.borderLeft = '1px solid rgba(0,0,0,0.08)'; // 中间加一道浅色的分割线
+        tocCol.style.paddingLeft = '15px';
+
+        tocCol.innerHTML = '<h3 style="margin-top:0; font-size:1em; color:#555;">目录大纲</h3><ul class="toc-list" style="margin: 0; padding: 0; list-style: none;"></ul>';
+
+        // 组装并追加到侧边栏
+        columnsWrapper.appendChild(fileListCol);
+        columnsWrapper.appendChild(tocCol);
+        mdList.appendChild(columnsWrapper);
+    }
+
+    // --- 3. 填充右侧的目录内容 ---
+    const tocUl = document.querySelector('.toc-list');
+    if (tocUl) {
+        tocUl.innerHTML = ''; // 清空旧的目录
+
+        const headings = wrapper.querySelectorAll('h1, h2, h3, h4, h5, h6');
+        if (headings.length === 0) {
+            tocUl.innerHTML = '<li style="padding: 8px 10px; color: #888; font-size: 0.9em; font-style: italic;">本文暂无目录</li>';
+        } else {
+            headings.forEach((h, index) => {
+                if (!h.id) h.id = 'md-heading-' + index;
+
+                const li = document.createElement('li');
+                li.style.padding = '4px 8px';
+                
+                const level = parseInt(h.tagName.substring(1));
+                const indent = Math.max(0, (level - 2) * 12); 
+                li.style.paddingLeft = (8 + indent) + 'px';
+
+                const a = document.createElement('a');
+                a.href = '#' + h.id;
+                a.textContent = h.textContent;
+                a.title = h.textContent; 
+                a.style.color = '#444'; 
+                a.style.textDecoration = 'none';
+                a.style.fontSize = '0.95em';
+                a.style.display = 'block';
+
+                a.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    h.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+
+                // 悬停交互颜色
+                a.onmouseover = function() { this.style.color = '#337ab7'; }
+                a.onmouseout = function() { this.style.color = '#444'; }
+
+                li.appendChild(a);
+                tocUl.appendChild(li);
+            });
+        }
+    }
+
+    // 确保显示
+    mdList.style.display = 'flex';
+}
+
+
+
+
+
+
     async function loadLocalMdFile(filePath, title) {
         const contentEl = document.querySelector('.md-content');
         const panel = document.getElementById('md-panel');
@@ -303,11 +466,11 @@
             });
 
             // Update panel title
-            if (panelTitle) panelTitle.textContent = title || 'Markdown';
-            // Hide the file list for single file view
-            const mdList = document.querySelector('.md-list');
-            if (mdList) mdList.style.display = 'none';
-            
+            // if (panelTitle) panelTitle.textContent = title || 'Markdown';
+            // // Hide the file list for single file view
+            // const mdList = document.querySelector('.md-list');
+            // if (mdList) mdList.style.display = 'none';
+            generateTOC(wrapper);
             openPanel();
         } catch (e) {
             if (e.name === 'AbortError') {

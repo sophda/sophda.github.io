@@ -1,7 +1,7 @@
 {
   "background": "",
   "profile": {
-    "avatar": "src/avatar.png",
+    "avatar": "img/avatar.png",
     "username": "sophda",
     "bio": "DIY爱好者，记录日常学习和项目"
   },
@@ -27,21 +27,27 @@
   ],
   "projects": [
     {
-      "image": "src/ar.gif",
+      "image": "img/nas.png",
+      "name": "DIY NAS",
+      "description": "古法炮制一个NAS主机",
+      "link": "https://github.com/sophda/DiyNAS"
+    },
+    {
+      "image": "img/ar.gif",
       "name": "AR SLAM",
       "description": "基于orbslam3和ace模型的AR系统，实现实时环境建模和定位功能",
       "link": "https://github.com/sophda/orbslam3-ar",
       "tags": ["2025.6"]
     },
     {
-      "image": "src/chatllm.gif",
-      "name": "Chat LLM",
+      "image": "img/chatllm.gif",
+      "name": "CHAT LLM",
       "description": "使用纳西妲语料进行微调qwen2.5大模型，使用MNN框架进行安卓部署",
       "link": "https://github.com/sophda/ChatLLM",
       "tags": ["2025.11"]
     },
     {
-      "image": "src/3dqt.png",
+      "image": "img/3dqt.png",
       "name": "PointCloud Process",
       "description": "本科毕设的一部分，用QT做的0代码点云处理软件",
       "link": "https://github.com/sophda/PointCloudProcessQT",

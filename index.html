@@ -402,11 +402,37 @@
             position: absolute;
             right: 14px;
             top: 12px;
-            background: transparent;
+            background: rgba(255, 255, 255, 0.8);
+            border: 0;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 100;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .md-panel .sidebar-toggle-btn {
+            display: none;
+            position: absolute;
+            left: 14px;
+            top: 12px;
+            background: rgba(255, 255, 255, 0.8);
             border: 0;
             font-size: 22px;
             cursor: pointer;
-            z-index: 80;
+            z-index: 100;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         /* Markdown content styles (simple GitHub-like) */
@@ -486,10 +512,12 @@
 
         @media (max-width: 900px) {
             .md-panel {
-                right: 12px;
-                left: 12px;
-                width: auto;
-                top: 80px;
+                inset: 0;
+                width: 100%;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 100%;
             }
         }
 
@@ -533,6 +561,35 @@
             .project-tag {
                 padding: 5px 10px;
                 font-size: 0.8em;
+            }
+
+            /* MD Mobile Optimizations */
+            .md-panel .sidebar-toggle-btn {
+                display: block;
+            }
+
+            .md-panel {
+                flex-direction: column;
+            }
+
+            .md-list {
+                display: none !important;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100% !important;
+                max-width: 100% !important;
+                height: 100% !important;
+                z-index: 90;
+                padding-top: 60px;
+            }
+
+            .md-panel.sidebar-open .md-list {
+                display: flex !important;
+            }
+
+            .md-content {
+                padding: 60px 16px 16px;
             }
         }
     </style>
@@ -695,6 +752,7 @@
     <!-- Markdown viewer panel -->
     <div id="md-panel" class="md-panel" aria-hidden="true">
         <button id="md-panel-close" class="close-btn" title="关闭">✕</button>
+        <button id="md-sidebar-toggle" class="sidebar-toggle-btn" title="显示目录">☰</button>
         <div class="md-list">
             <h3 id="md-panel-title">Files</h3>
             <ul></ul>

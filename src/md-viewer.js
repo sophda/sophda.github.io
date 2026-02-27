@@ -1,4 +1,4 @@
-(function() {
+(function () {
     function parseRepoLink(url) {
         try {
             const a = document.createElement('a');
@@ -67,9 +67,10 @@
         const panel = document.getElementById('md-panel');
         if (!panel) return;
         panel.classList.remove('open');
+        panel.classList.remove('sidebar-open'); // Ensure sidebar is closed when panel is closed
         panel.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
-        
+
         // Restore file list visibility
         const mdList = document.querySelector('.md-list');
         if (mdList) mdList.style.display = '';
@@ -109,7 +110,7 @@
                         try {
                             const r2 = await fetch(alt, { signal });
                             if (r2.ok) { res = r2; success = true; url = alt; break; }
-                        } catch (e) {}
+                        } catch (e) { }
                     }
                     if (!success) throw new Error('fetch failed ' + res.status);
                 } else {
@@ -135,7 +136,7 @@
                     } else if (progressBar) {
                         // indeterminate progress growth
                         progressBar.style.width = Math.min(96, (progressBar._w || 0) + 4) + '%';
-                        progressBar._w = parseInt(progressBar.style.width,10);
+                        progressBar._w = parseInt(progressBar.style.width, 10);
                     }
                     if (aborted) throw new Error('aborted');
                 }
@@ -160,7 +161,7 @@
                             try {
                                 const resolved = new URL(src, baseRaw).toString();
                                 img.src = resolved;
-                            } catch (e) {}
+                            } catch (e) { }
                         }
                     });
                 }
@@ -207,18 +208,18 @@
         list.innerHTML = '';
         contentEl.innerHTML = '<p>请选择左侧的 Markdown 文件以预览。</p>';
         if (title) title.textContent = (parsed && parsed.path) ? parsed.path : 'Files';
-            files.forEach(file => {
+        files.forEach(file => {
             const li = document.createElement('li');
             const a = document.createElement('a');
             a.href = '#';
-                a.textContent = file.name + (file.size ? ` (${Math.round(file.size/1024)} KB)` : '');
+            a.textContent = file.name + (file.size ? ` (${Math.round(file.size / 1024)} KB)` : '');
             a.addEventListener('click', (e) => {
                 e.preventDefault();
                 const url = buildRawUrl(file, parsed);
                 // determine base raw URL for resolving relative assets
                 let baseRaw = null;
                 if (file.download_url) {
-                    baseRaw = file.download_url.replace(/[^/]+$/,'');
+                    baseRaw = file.download_url.replace(/[^/]+$/, '');
                 } else if (parsed && parsed.provider) {
                     // fallback base construction
                     if (parsed.provider === 'github') {
@@ -228,13 +229,13 @@
 
                     }
                 }
-                    // If file is large, stream with progress and allow cancel
-                    const size = file.size || null;
-                    const LARGE_THRESHOLD = 300 * 1024; // 300KB
-                    if (size && size > LARGE_THRESHOLD) {
-                        if (!confirm(`文件较大 (${Math.round(size/1024)} KB)，继续下载并渲染吗？`)) return;
-                    }
-                    loadAndRenderFile(url, parsed, baseRaw, size);
+                // If file is large, stream with progress and allow cancel
+                const size = file.size || null;
+                const LARGE_THRESHOLD = 300 * 1024; // 300KB
+                if (size && size > LARGE_THRESHOLD) {
+                    if (!confirm(`文件较大 (${Math.round(size / 1024)} KB)，继续下载并渲染吗？`)) return;
+                }
+                loadAndRenderFile(url, parsed, baseRaw, size);
             });
             li.appendChild(a);
             list.appendChild(li);
@@ -253,203 +254,215 @@
         return link && !link.startsWith('http://') && !link.startsWith('https://');
     }
 
-    
+
 
     // ====== 本地文件使用：单列目录 ======
-function generateTOC(wrapper) {
-    const mdList = document.querySelector('.md-list');
-    if (!mdList) return;
+    function generateTOC(wrapper) {
+        const mdList = document.querySelector('.md-list');
+        if (!mdList) return;
 
-    // 1. 恢复本地单列模式的宽度和布局
-    mdList.style.width = '320px'; 
-    mdList.style.maxWidth = '40%';
-    mdList.style.display = 'block';
+        // 1. 恢复本地单列模式的宽度和布局
+        if (window.innerWidth > 768) {
+            mdList.style.width = '320px';
+            mdList.style.maxWidth = '40%';
+        } else {
+            mdList.style.width = '';
+            mdList.style.maxWidth = '';
+        }
+        mdList.style.display = 'block';
 
-    const panelTitle = document.getElementById('md-panel-title');
-    if (panelTitle) {
-        panelTitle.textContent = '目录大纲';
-        panelTitle.style.marginBottom = '10px';
-    }
+        const panelTitle = document.getElementById('md-panel-title');
+        if (panelTitle) {
+            panelTitle.textContent = '目录大纲';
+            panelTitle.style.marginBottom = '10px';
+        }
 
-    // 2. 核心修复：如果存在远程文件产生的双列布局，必须先销毁它，把文件列表还原
-    const columnsWrapper = document.getElementById('md-toc-columns-wrapper');
-    if (columnsWrapper) {
-        // 取出原本的文件列表 ul
-        const originalUl = columnsWrapper.querySelector('#md-file-list-col ul');
-        if (originalUl) {
-            // 确保它插回最前面，以免影响 renderList 抓取
-            const firstUl = mdList.querySelector('ul');
-            if (firstUl) {
-                mdList.insertBefore(originalUl, firstUl);
-            } else {
-                mdList.appendChild(originalUl);
+        // 2. 核心修复：如果存在远程文件产生的双列布局，必须先销毁它，把文件列表还原
+        const columnsWrapper = document.getElementById('md-toc-columns-wrapper');
+        if (columnsWrapper) {
+            // 取出原本的文件列表 ul
+            const originalUl = columnsWrapper.querySelector('#md-file-list-col ul');
+            if (originalUl) {
+                // 确保它插回最前面，以免影响 renderList 抓取
+                const firstUl = mdList.querySelector('ul');
+                if (firstUl) {
+                    mdList.insertBefore(originalUl, firstUl);
+                } else {
+                    mdList.appendChild(originalUl);
+                }
             }
-        }
-        columnsWrapper.remove(); // 销毁双列容器
-    }
-
-    // 3. 此时 mdList 下的第一个 ul 是系统原始的文件列表。
-    // 对于本地文件，我们不需要显示文件列表，将其隐藏即可。
-    const fileUl = mdList.querySelector('ul:not(.local-toc-list)');
-    if (fileUl) {
-        fileUl.style.display = 'none';
-    }
-
-    // 4. 查找或创建专用于本地文件的目录容器
-    let localTocUl = mdList.querySelector('.local-toc-list');
-    if (!localTocUl) {
-        localTocUl = document.createElement('ul');
-        localTocUl.className = 'local-toc-list';
-        localTocUl.style.listStyle = 'none';
-        localTocUl.style.padding = '0';
-        mdList.appendChild(localTocUl);
-    }
-
-    // 确保本地目录显示，并清空旧内容
-    localTocUl.style.display = 'block';
-    localTocUl.innerHTML = ''; 
-
-    // 5. 生成新的本地目录
-    const headings = wrapper.querySelectorAll('h1, h2, h3, h4, h5, h6');
-    if (headings.length === 0) {
-        localTocUl.innerHTML = '<li style="padding: 8px 10px; color: #888; font-size: 0.9em;">本文暂无目录</li>';
-    } else {
-        headings.forEach((h, index) => {
-            if (!h.id) h.id = 'md-heading-' + index;
-            const li = document.createElement('li');
-            const level = parseInt(h.tagName.substring(1));
-            li.style.paddingLeft = ((level - 1) * 12) + 'px';
-            
-            const a = document.createElement('a');
-            a.href = '#' + h.id;
-            a.textContent = h.textContent;
-            a.title = h.textContent; 
-            
-            a.addEventListener('click', (e) => {
-                e.preventDefault();
-                h.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            });
-            
-            li.appendChild(a);
-            localTocUl.appendChild(li);
-        });
-    }
-
-    mdList.style.display = 'block';
-}
-
-
-// ====== 远程文件使用：双列并排 (文件列表 + 目录) ======
-function generateRenderTOC(wrapper) {
-    const mdList = document.querySelector('.md-list');
-    if (!mdList) return;
-
-    // 1. 设置双列模式的宽度
-    mdList.style.width = '480px'; 
-    mdList.style.maxWidth = '50%';
-    mdList.style.display = 'flex';
-    mdList.style.flexDirection = 'column';
-
-    const panelTitle = document.getElementById('md-panel-title');
-    if (panelTitle && panelTitle.textContent !== '文档概览') {
-        panelTitle.textContent = '文档概览';
-        panelTitle.style.marginBottom = '15px';
-    }
-
-    // 2. 隐藏上面本地文件可能创建的本地目录
-    const localTocUl = mdList.querySelector('.local-toc-list');
-    if (localTocUl) localTocUl.style.display = 'none';
-
-    // 3. 构建或查找双列容器
-    let columnsWrapper = document.getElementById('md-toc-columns-wrapper');
-    if (!columnsWrapper) {
-        columnsWrapper = document.createElement('div');
-        columnsWrapper.id = 'md-toc-columns-wrapper';
-        columnsWrapper.style.display = 'flex';
-        columnsWrapper.style.flexDirection = 'row';
-        columnsWrapper.style.gap = '15px';
-        columnsWrapper.style.alignItems = 'stretch';
-        columnsWrapper.style.flex = '1'; 
-        columnsWrapper.style.overflow = 'hidden'; 
-
-        // 左列：文件列表
-        const fileListCol = document.createElement('div');
-        fileListCol.id = 'md-file-list-col';
-        fileListCol.style.flex = '1';
-        fileListCol.style.overflowY = 'auto'; 
-        fileListCol.style.height = '100%';
-        
-        // 抓取原本存放文件的 ul 并装入左列
-        const originalUl = mdList.querySelector('ul:not(.local-toc-list):not(.toc-list)');
-        if (originalUl) {
-            originalUl.style.display = 'block'; // 确保解除隐藏状态
-            fileListCol.appendChild(originalUl);
+            columnsWrapper.remove(); // 销毁双列容器
         }
 
-        // 右列：目录大纲
-        const tocCol = document.createElement('div');
-        tocCol.id = 'md-toc-container';
-        tocCol.style.flex = '1';
-        tocCol.style.overflowY = 'auto'; 
-        tocCol.style.height = '100%';
-        tocCol.style.borderLeft = '1px solid rgba(0,0,0,0.08)'; 
-        tocCol.style.paddingLeft = '15px';
+        // 3. 此时 mdList 下的第一个 ul 是系统原始的文件列表。
+        // 对于本地文件，我们不需要显示文件列表，将其隐藏即可。
+        const fileUl = mdList.querySelector('ul:not(.local-toc-list)');
+        if (fileUl) {
+            fileUl.style.display = 'none';
+        }
 
-        tocCol.innerHTML = '<h3 style="margin-top:0; font-size:1em; color:#555;">目录大纲</h3><ul class="toc-list" style="margin: 0; padding: 0; list-style: none;"></ul>';
+        // 4. 查找或创建专用于本地文件的目录容器
+        let localTocUl = mdList.querySelector('.local-toc-list');
+        if (!localTocUl) {
+            localTocUl = document.createElement('ul');
+            localTocUl.className = 'local-toc-list';
+            localTocUl.style.listStyle = 'none';
+            localTocUl.style.padding = '0';
+            mdList.appendChild(localTocUl);
+        }
 
-        columnsWrapper.appendChild(fileListCol);
-        columnsWrapper.appendChild(tocCol);
-        mdList.appendChild(columnsWrapper);
-    } else {
-        // 如果双列容器已经存在，只需确保左侧的文件列表被设为可见
-        const originalUl = columnsWrapper.querySelector('#md-file-list-col ul');
-        if (originalUl) originalUl.style.display = 'block';
-    }
+        // 确保本地目录显示，并清空旧内容
+        localTocUl.style.display = 'block';
+        localTocUl.innerHTML = '';
 
-    // 4. 填充右侧的目录内容
-    const tocUl = document.querySelector('.toc-list');
-    if (tocUl) {
-        tocUl.innerHTML = ''; 
-
+        // 5. 生成新的本地目录
         const headings = wrapper.querySelectorAll('h1, h2, h3, h4, h5, h6');
         if (headings.length === 0) {
-            tocUl.innerHTML = '<li style="padding: 8px 10px; color: #888; font-size: 0.9em; font-style: italic;">本文暂无目录</li>';
+            localTocUl.innerHTML = '<li style="padding: 8px 10px; color: #888; font-size: 0.9em;">本文暂无目录</li>';
         } else {
             headings.forEach((h, index) => {
                 if (!h.id) h.id = 'md-heading-' + index;
-
                 const li = document.createElement('li');
-                li.style.padding = '4px 8px';
-                
                 const level = parseInt(h.tagName.substring(1));
-                const indent = Math.max(0, (level - 2) * 12); 
-                li.style.paddingLeft = (8 + indent) + 'px';
+                li.style.paddingLeft = ((level - 1) * 12) + 'px';
 
                 const a = document.createElement('a');
                 a.href = '#' + h.id;
                 a.textContent = h.textContent;
-                a.title = h.textContent; 
-                a.style.color = '#444'; 
-                a.style.textDecoration = 'none';
-                a.style.fontSize = '0.95em';
-                a.style.display = 'block';
+                a.title = h.textContent;
 
                 a.addEventListener('click', (e) => {
                     e.preventDefault();
                     h.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 });
 
-                a.onmouseover = function() { this.style.color = '#337ab7'; }
-                a.onmouseout = function() { this.style.color = '#444'; }
-
                 li.appendChild(a);
-                tocUl.appendChild(li);
+                localTocUl.appendChild(li);
             });
         }
+
+        mdList.style.display = 'block';
     }
 
-    mdList.style.display = 'flex';
-}
+
+    // ====== 远程文件使用：双列并排 (文件列表 + 目录) ======
+    function generateRenderTOC(wrapper) {
+        const mdList = document.querySelector('.md-list');
+        if (!mdList) return;
+
+        // 1. 设置双列模式的宽度
+        if (window.innerWidth > 768) {
+            mdList.style.width = '480px';
+            mdList.style.maxWidth = '50%';
+            mdList.style.display = 'flex';
+            mdList.style.flexDirection = 'column';
+        } else {
+            mdList.style.width = '';
+            mdList.style.maxWidth = '';
+            mdList.style.display = '';
+            mdList.style.flexDirection = '';
+        }
+
+        const panelTitle = document.getElementById('md-panel-title');
+        if (panelTitle && panelTitle.textContent !== '文档概览') {
+            panelTitle.textContent = '文档概览';
+            panelTitle.style.marginBottom = '15px';
+        }
+
+        // 2. 隐藏上面本地文件可能创建的本地目录
+        const localTocUl = mdList.querySelector('.local-toc-list');
+        if (localTocUl) localTocUl.style.display = 'none';
+
+        // 3. 构建或查找双列容器
+        let columnsWrapper = document.getElementById('md-toc-columns-wrapper');
+        if (!columnsWrapper) {
+            columnsWrapper = document.createElement('div');
+            columnsWrapper.id = 'md-toc-columns-wrapper';
+            columnsWrapper.style.display = 'flex';
+            columnsWrapper.style.flexDirection = 'row';
+            columnsWrapper.style.gap = '15px';
+            columnsWrapper.style.alignItems = 'stretch';
+            columnsWrapper.style.flex = '1';
+            columnsWrapper.style.overflow = 'hidden';
+
+            // 左列：文件列表
+            const fileListCol = document.createElement('div');
+            fileListCol.id = 'md-file-list-col';
+            fileListCol.style.flex = '1';
+            fileListCol.style.overflowY = 'auto';
+            fileListCol.style.height = '100%';
+
+            // 抓取原本存放文件的 ul 并装入左列
+            const originalUl = mdList.querySelector('ul:not(.local-toc-list):not(.toc-list)');
+            if (originalUl) {
+                originalUl.style.display = 'block'; // 确保解除隐藏状态
+                fileListCol.appendChild(originalUl);
+            }
+
+            // 右列：目录大纲
+            const tocCol = document.createElement('div');
+            tocCol.id = 'md-toc-container';
+            tocCol.style.flex = '1';
+            tocCol.style.overflowY = 'auto';
+            tocCol.style.height = '100%';
+            tocCol.style.borderLeft = '1px solid rgba(0,0,0,0.08)';
+            tocCol.style.paddingLeft = '15px';
+
+            tocCol.innerHTML = '<h3 style="margin-top:0; font-size:1em; color:#555;">目录大纲</h3><ul class="toc-list" style="margin: 0; padding: 0; list-style: none;"></ul>';
+
+            columnsWrapper.appendChild(fileListCol);
+            columnsWrapper.appendChild(tocCol);
+            mdList.appendChild(columnsWrapper);
+        } else {
+            // 如果双列容器已经存在，只需确保左侧的文件列表被设为可见
+            const originalUl = columnsWrapper.querySelector('#md-file-list-col ul');
+            if (originalUl) originalUl.style.display = 'block';
+        }
+
+        // 4. 填充右侧的目录内容
+        const tocUl = document.querySelector('.toc-list');
+        if (tocUl) {
+            tocUl.innerHTML = '';
+
+            const headings = wrapper.querySelectorAll('h1, h2, h3, h4, h5, h6');
+            if (headings.length === 0) {
+                tocUl.innerHTML = '<li style="padding: 8px 10px; color: #888; font-size: 0.9em; font-style: italic;">本文暂无目录</li>';
+            } else {
+                headings.forEach((h, index) => {
+                    if (!h.id) h.id = 'md-heading-' + index;
+
+                    const li = document.createElement('li');
+                    li.style.padding = '4px 8px';
+
+                    const level = parseInt(h.tagName.substring(1));
+                    const indent = Math.max(0, (level - 2) * 12);
+                    li.style.paddingLeft = (8 + indent) + 'px';
+
+                    const a = document.createElement('a');
+                    a.href = '#' + h.id;
+                    a.textContent = h.textContent;
+                    a.title = h.textContent;
+                    a.style.color = '#444';
+                    a.style.textDecoration = 'none';
+                    a.style.fontSize = '0.95em';
+                    a.style.display = 'block';
+
+                    a.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        h.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    });
+
+                    a.onmouseover = function () { this.style.color = '#337ab7'; }
+                    a.onmouseout = function () { this.style.color = '#444'; }
+
+                    li.appendChild(a);
+                    tocUl.appendChild(li);
+                });
+            }
+        }
+
+        mdList.style.display = 'flex';
+    }
 
 
 
@@ -459,7 +472,7 @@ function generateRenderTOC(wrapper) {
         const contentEl = document.querySelector('.md-content');
         const panel = document.getElementById('md-panel');
         const panelTitle = document.getElementById('md-panel-title');
-        
+
         contentEl.innerHTML = `
             <div class="md-progress">
                 <div class="progress-label">加载中...</div>
@@ -471,7 +484,7 @@ function generateRenderTOC(wrapper) {
         const cancelBtn = contentEl.querySelector('.md-cancel-btn');
         const controller = new AbortController();
         let aborted = false;
-        
+
         cancelBtn.addEventListener('click', () => {
             aborted = true;
             controller.abort();
@@ -502,7 +515,7 @@ function generateRenderTOC(wrapper) {
                     try {
                         const resolved = new URL(src, window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1) + baseUrl).toString();
                         img.src = resolved;
-                    } catch (e) {}
+                    } catch (e) { }
                 }
             });
 
@@ -526,7 +539,7 @@ function generateRenderTOC(wrapper) {
         }
     }
 
-    window.openMdFolder = async function(link, title) {
+    window.openMdFolder = async function (link, title) {
         // Handle local file paths
         if (isLocalPath(link)) {
             // If it's a .md file, load it directly
@@ -547,7 +560,7 @@ function generateRenderTOC(wrapper) {
             }
             return;
         }
-        
+
         const parsed = parseRepoLink(link);
         if (!parsed) {
             // fallback: open in new tab
@@ -571,6 +584,21 @@ function generateRenderTOC(wrapper) {
     document.addEventListener('DOMContentLoaded', () => {
         const closeBtn = document.getElementById('md-panel-close');
         if (closeBtn) closeBtn.addEventListener('click', closePanel);
+
+        const toggleBtn = document.getElementById('md-sidebar-toggle');
+        const panel = document.getElementById('md-panel');
+        if (toggleBtn && panel) {
+            toggleBtn.addEventListener('click', () => {
+                panel.classList.toggle('sidebar-open');
+            });
+        }
+
+        // Close sidebar on click if mobile
+        document.querySelector('.md-list').addEventListener('click', (e) => {
+            if (window.innerWidth <= 768 && e.target.tagName === 'A') {
+                panel.classList.remove('sidebar-open');
+            }
+        });
     });
 
 })();

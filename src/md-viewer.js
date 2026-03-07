@@ -156,6 +156,7 @@
                 if (baseRaw) {
                     const imgs = wrapper.querySelectorAll('img');
                     imgs.forEach(img => {
+                        img.setAttribute('loading', 'lazy');
                         const src = img.getAttribute('src') || '';
                         if (!src.match(/^https?:|^data:/i)) {
                             try {
@@ -505,6 +506,7 @@
             const baseUrl = filePath.substring(0, filePath.lastIndexOf('/') + 1);
             const imgs = wrapper.querySelectorAll('img');
             imgs.forEach(img => {
+                img.setAttribute('loading', 'lazy');
                 const src = img.getAttribute('src') || '';
                 if (!src.match(/^https?:|^data:|^\//i)) {
                     try {

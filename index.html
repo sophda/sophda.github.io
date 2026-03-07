@@ -599,7 +599,7 @@
     <div class="container">
         <div class="profile-section">
             <div class="avatar-wrapper">
-                <img src="" alt="头像" class="avatar" id="avatar">
+                <img src="" alt="头像" class="avatar" id="avatar" loading="lazy">
             </div>
             <h1 class="username" id="username"></h1>
             <p class="bio" id="bio"></p>
@@ -685,61 +685,83 @@
                 }
 
                 const notesGrid = document.getElementById('notes-grid');
+                const noteObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const { note, container } = entry.target._noteData;
+                            container.innerHTML = `
+                                <div class="note-number">${note.id}</div>
+                                <div class="note-title">${note.title}</div>
+                                <div class="note-content">${note.content}</div>
+                            `;
+                            if (note.link) {
+                                container.style.cursor = 'pointer';
+                                container.onclick = () => {
+                                    if (window.openMdFolder) window.openMdFolder(note.link, note.title);
+                                    else window.open(note.link, '_blank');
+                                };
+                            }
+                            noteObserver.unobserve(entry.target);
+                        }
+                    });
+                }, { rootMargin: '200px' });
+
                 config.notes.forEach(note => {
                     const noteCard = document.createElement('div');
                     noteCard.className = 'note-card';
-                    noteCard.innerHTML = `
-                        <div class="note-number">${note.id}</div>
-                        <div class="note-title">${note.title}</div>
-                        <div class="note-content">${note.content}</div>
-                    `;
-                    if (note.link) {
-                        noteCard.style.cursor = 'pointer';
-                        noteCard.addEventListener('click', () => {
-                            if (window.openMdFolder) window.openMdFolder(note.link, note.title);
-                            else window.open(note.link, '_blank');
-                        });
-                    }
+                    noteCard.style.minHeight = '140px'; // Set a minimum height to avoid layout shift
+                    noteCard._noteData = { note, container: noteCard };
                     notesGrid.appendChild(noteCard);
+                    noteObserver.observe(noteCard);
                 });
 
                 const projectsGrid = document.getElementById('projects-grid');
+                const projectObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const { project, container } = entry.target._projectData;
+
+                            let projectImageHTML = '';
+                            if (project.image) {
+                                projectImageHTML = `<img src="${project.image}" alt="${project.name}" loading="lazy">`;
+                            }
+
+                            let tagsHTML = '';
+                            if (project.tags && Array.isArray(project.tags)) {
+                                tagsHTML = '<div class="project-tags">';
+                                project.tags.forEach((tag, index) => {
+                                    const color = getTagColor(index);
+                                    tagsHTML += `<span class="project-tag" style="background: ${color.bg};">${tag}</span>`;
+                                });
+                                tagsHTML += '</div>';
+                            }
+
+                            container.innerHTML = `
+                                <div class="project-info">
+                                    <div class="project-name">${project.name}</div>
+                                    <div class="project-description">${project.description}</div>
+                                    ${tagsHTML}
+                                </div>
+                                <div class="project-image">${projectImageHTML}</div>
+                            `;
+
+                            container.onclick = () => {
+                                if (window.openMdFolder) window.openMdFolder(project.link, project.name);
+                                else window.open(project.link, '_blank');
+                            };
+
+                            projectObserver.unobserve(entry.target);
+                        }
+                    });
+                }, { rootMargin: '200px' });
+
                 config.projects.forEach(project => {
                     const projectCard = document.createElement('div');
                     projectCard.className = 'project-card';
-
-                    let projectImageHTML;
-                    if (project.image) {
-                        projectImageHTML = `<img src="${project.image}" alt="${project.name}">`;
-                    } else {
-                        projectImageHTML = '';
-                    }
-
-                    let tagsHTML = '';
-                    if (project.tags && Array.isArray(project.tags)) {
-                        tagsHTML = '<div class="project-tags">';
-                        project.tags.forEach((tag, index) => {
-                            const color = getTagColor(index);
-                            tagsHTML += `<span class="project-tag" style="background: ${color.bg};">${tag}</span>`;
-                        });
-                        tagsHTML += '</div>';
-                    }
-
-                    projectCard.innerHTML = `
-                        <div class="project-info">
-                            <div class="project-name">${project.name}</div>
-                            <div class="project-description">${project.description}</div>
-                            ${tagsHTML}
-                        </div>
-                        <div class="project-image">${projectImageHTML}</div>
-                    `;
-
-                    projectCard.addEventListener('click', () => {
-                        if (window.openMdFolder) window.openMdFolder(project.link, project.name);
-                        else window.open(project.link, '_blank');
-                    });
-
+                    projectCard.style.minHeight = '200px'; // Set a minimum height to avoid layout shift
+                    projectCard._projectData = { project, container: projectCard };
                     projectsGrid.appendChild(projectCard);
+                    projectObserver.observe(projectCard);
                 });
             } catch (error) {
                 console.error('加载配置文件失败:', error);

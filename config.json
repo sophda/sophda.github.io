@@ -51,7 +51,7 @@
     {
       "image": "img/ar.gif",
       "name": "AR SLAM",
-      "description": "硕士期间周末和假期做的，基于orbslam3和ace模型的AR系统，实现空间重定位和实时定位功能，算是给操蛋的读研生活增加了点意义",
+      "description": "硕士期间周末和假期做的，基于orbslam3和ace模型的AR系统，实现空间重定位和实时定位功能",
       "link": "proj/ar.md",
       "tags": [
         "2025.6",

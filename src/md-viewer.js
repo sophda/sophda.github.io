@@ -76,6 +76,15 @@
         if (mdList) mdList.style.display = '';
     }
 
+    function preprocessMarkdown(txt) {
+        // Match Bilibili video links: https://www.bilibili.com/video/BV...
+        // Convert them to embedded iframes with optional autoplay
+        const bilibiliRegex = /^[ \t]*(https?:\/\/www\.bilibili\.com\/video\/(BV[a-zA-Z0-9]+)\/?)[ \t]*$/gm;
+        return txt.replace(bilibiliRegex, (match, url, bvid) => {
+            return `<div class="video-container"><iframe src="//player.bilibili.com/player.html?bvid=${bvid}&page=1&autoplay=1&muted=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe></div>`;
+        });
+    }
+
     async function loadAndRenderFile(url, parsed, baseRaw, fileSize) {
         const contentEl = document.querySelector('.md-content');
         const controller = new AbortController();
@@ -140,10 +149,12 @@
                     }
                     if (aborted) throw new Error('aborted');
                 }
-                chunks += decoder.decode();
-                const txt = chunks;
+                const txt = preprocessMarkdown(chunks);
                 const html = window.marked ? window.marked.parse(txt) : txt;
-                const safe = window.DOMPurify ? window.DOMPurify.sanitize(html) : html;
+                const safe = window.DOMPurify ? window.DOMPurify.sanitize(html, {
+                    ADD_TAGS: ["iframe"],
+                    ADD_ATTR: ["allow", "allowfullscreen", "frameborder", "scrolling"]
+                }) : html;
                 const wrapper = document.createElement('div');
                 wrapper.className = 'md-content-wrapper';
                 wrapper.innerHTML = safe;
@@ -168,9 +179,13 @@
                 }
             } else {
                 // fallback simple text grab
-                const txt = await res.text();
+                const rawTxt = await res.text();
+                const txt = preprocessMarkdown(rawTxt);
                 const html = window.marked ? window.marked.parse(txt) : txt;
-                const safe = window.DOMPurify ? window.DOMPurify.sanitize(html) : html;
+                const safe = window.DOMPurify ? window.DOMPurify.sanitize(html, {
+                    ADD_TAGS: ["iframe"],
+                    ADD_ATTR: ["allow", "allowfullscreen", "frameborder", "scrolling"]
+                }) : html;
                 const wrapper = document.createElement('div');
                 wrapper.className = 'md-content-wrapper';
                 wrapper.innerHTML = safe;
@@ -493,9 +508,13 @@
                 throw new Error(`Failed to fetch file: ${res.status}`);
             }
 
-            const txt = await res.text();
+            const rawTxt = await res.text();
+            const txt = preprocessMarkdown(rawTxt);
             const html = window.marked ? window.marked.parse(txt) : txt;
-            const safe = window.DOMPurify ? window.DOMPurify.sanitize(html) : html;
+            const safe = window.DOMPurify ? window.DOMPurify.sanitize(html, {
+                ADD_TAGS: ["iframe"],
+                ADD_ATTR: ["allow", "allowfullscreen", "frameborder", "scrolling"]
+            }) : html;
             const wrapper = document.createElement('div');
             wrapper.className = 'md-content-wrapper';
             wrapper.innerHTML = safe;

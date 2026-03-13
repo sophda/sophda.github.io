@@ -29,6 +29,16 @@
   ],
   "projects": [
     {
+      "image": "proj/src/image-20260313150553077.png",
+      "name": "原神自动代肝",
+      "description": "使用openclaw+bettergi实现原神自动代肝",
+      "link": "proj/openclaw.md",
+      "tags": [
+        "2026.3",
+        "DONE"
+      ]
+    },
+    {
       "image": "img/nas.png",
       "name": "DIY NAS",
       "description": "古法炮制一个个人存储NAS",
